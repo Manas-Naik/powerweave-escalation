@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11px; color: #1a1a1a; background: #fff; padding: 40px 50px; line-height: 1.6; }
+
+  /* Cover */
+  .cover { text-align: center; padding: 50px 0 36px; border-bottom: 3px solid #2E7D32; margin-bottom: 32px; }
+  .cover h1 { font-size: 26px; color: #2E7D32; font-weight: 700; margin-bottom: 6px; }
+  .cover h2 { font-size: 14px; color: #555; font-weight: 400; margin-bottom: 22px; }
+  .cover .meta { display: flex; justify-content: center; gap: 36px; font-size: 11px; color: #555; }
+  .cover .meta span strong { color: #1a1a1a; }
+
+  /* Badges */
+  .badge { display: inline-block; padding: 2px 9px; border-radius: 10px; font-size: 10px; font-weight: 600; }
+  .badge.green  { background: #E8F5E9; color: #2E7D32; }
+  .badge.blue   { background: #E3F2FD; color: #1565C0; }
+  .badge.amber  { background: #FFF8E1; color: #E65100; }
+  .badge.purple { background: #F3E5F5; color: #6A1B9A; }
+  .badge.red    { background: #FFEBEE; color: #B71C1C; }
+
+  /* Sections */
+  h2.section { font-size: 14px; color: #2E7D32; border-bottom: 2px solid #C8E6C9; padding-bottom: 5px; margin: 28px 0 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+  h3 { font-size: 12px; color: #1B5E20; margin: 16px 0 6px; font-weight: 600; }
+  p  { margin-bottom: 8px; color: #333; }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 10.5px; }
+  th { background: #2E7D32; color: #fff; padding: 7px 10px; text-align: left; font-weight: 600; }
+  td { padding: 6px 10px; border-bottom: 1px solid #e0e0e0; vertical-align: top; }
+  tr:nth-child(even) td { background: #F9FBE7; }
+
+  /* Code blocks */
+  code { font-family: 'Consolas', monospace; background: #F1F8E9; padding: 1px 5px; border-radius: 3px; font-size: 10px; color: #1B5E20; }
+  pre  { font-family: 'Consolas', monospace; background: #263238; color: #A5D6A7; padding: 12px 16px; border-radius: 6px; font-size: 9.5px; margin: 8px 0 14px; white-space: pre-wrap; line-height: 1.7; }
+  pre .comment { color: #546E7A; }
+  pre .key     { color: #80CBC4; }
+  pre .val     { color: #C3E88D; }
+  pre .str     { color: #F48FB1; }
+  pre .kw      { color: #82AAFF; }
+
+  /* Pipeline diagram */
+  .pipeline { display: flex; align-items: center; gap: 0; margin: 18px 0 24px; flex-wrap: wrap; }
+  .pipe-job { background: #E8F5E9; border: 2px solid #2E7D32; border-radius: 8px; padding: 10px 14px; text-align: center; min-width: 110px; }
+  .pipe-job .title { font-size: 11px; font-weight: 700; color: #1B5E20; }
+  .pipe-job .sub   { font-size: 9px; color: #555; margin-top: 3px; }
+  .pipe-job.trigger { background: #E3F2FD; border-color: #1565C0; }
+  .pipe-job.trigger .title { color: #1565C0; }
+  .pipe-job.conditional { background: #FFF8E1; border-color: #E65100; }
+  .pipe-job.conditional .title { color: #E65100; }
+  .arrow { font-size: 18px; color: #999; padding: 0 6px; }
+  .arrow.down { display: block; text-align: center; transform: rotate(90deg); padding: 2px 0; }
+  .pipe-parallel { display: flex; flex-direction: column; gap: 8px; }
+
+  /* Stats */
+  .stat-row { display: flex; gap: 12px; margin-bottom: 18px; }
+  .stat-box { flex: 1; border: 1px solid #C8E6C9; border-radius: 6px; padding: 10px 14px; text-align: center; }
+  .stat-box .num { font-size: 22px; font-weight: 700; color: #2E7D32; }
+  .stat-box .lbl { font-size: 10px; color: #777; }
+
+  ul { padding-left: 18px; margin-bottom: 10px; }
+  li { margin-bottom: 4px; color: #333; }
+
+  .page-break { page-break-before: always; }
+  .footer { margin-top: 36px; border-top: 1px solid #e0e0e0; padding-top: 10px; text-align: center; font-size: 9.5px; color: #aaa; }
+  .env-var { font-family: monospace; background: #FFF3E0; padding: 1px 5px; border-radius: 3px; font-size: 10px; color: #E65100; }
+  .step-num { display: inline-block; width: 18px; height: 18px; background: #2E7D32; color: #fff; border-radius: 50%; text-align: center; line-height: 18px; font-size: 9px; font-weight: 700; margin-right: 5px; }
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover">
+  <h1>CI Pipeline Definition</h1>
+  <h2>Powerweave Smart Task Escalation Engine — GitHub Actions</h2>
+  <div class="meta">
+    <span><strong>Project:</strong> powerweave-escalation</span>
+    <span><strong>Platform:</strong> GitHub Actions</span>
+    <span><strong>Date:</strong> 26 May 2026</span>
+    <span><strong>Version:</strong> 1.0</span>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stat-row">
+  <div class="stat-box"><div class="num">4</div><div class="lbl">Jobs</div></div>
+  <div class="stat-box"><div class="num">2</div><div class="lbl">Triggers</div></div>
+  <div class="stat-box"><div class="num">Node 22</div><div class="lbl">Runtime</div></div>
+  <div class="stat-box"><div class="num">80%</div><div class="lbl">Coverage Gate</div></div>
+  <div class="stat-box"><div class="num">ubuntu</div><div class="lbl">Runner</div></div>
+  <div class="stat-box"><div class="num">main</div><div class="lbl">Protected Branch</div></div>
+</div>
+
+<!-- SECTION 1: OVERVIEW -->
+<h2 class="section">1. Overview</h2>
+<p>The CI pipeline runs automatically on every push to <code>main</code> and on every pull request targeting <code>main</code>. It enforces code quality, correctness, and safe database migrations through four sequential/parallel jobs.</p>
+
+<!-- PIPELINE DIAGRAM -->
+<h3>Pipeline Flow</h3>
+<div class="pipeline">
+  <div class="pipe-job trigger">
+    <div class="title">Trigger</div>
+    <div class="sub">push/PR → main</div>
+  </div>
+  <div class="arrow">→</div>
+  <div class="pipe-job">
+    <div class="title">1. Lint</div>
+    <div class="sub">ESLint + tsc</div>
+  </div>
+  <div class="arrow">→</div>
+  <div class="pipe-parallel">
+    <div class="pipe-job">
+      <div class="title">2. Test</div>
+      <div class="sub">Jest + Coverage</div>
+    </div>
+    <div class="pipe-job">
+      <div class="title">3. Build</div>
+      <div class="sub">tsc compile</div>
+    </div>
+  </div>
+  <div class="arrow">→</div>
+  <div class="pipe-job conditional">
+    <div class="title">4. Migrate</div>
+    <div class="sub">main push only</div>
+  </div>
+</div>
+
+<!-- SECTION 2: TRIGGERS -->
+<h2 class="section">2. Triggers</h2>
+<table>
+  <tr><th>Event</th><th>Branch Filter</th><th>Jobs Executed</th></tr>
+  <tr>
+    <td><span class="badge blue">push</span></td>
+    <td><code>main</code></td>
+    <td>Lint → Test + Build (parallel) → Migrate</td>
+  </tr>
+  <tr>
+    <td><span class="badge purple">pull_request</span></td>
+    <td>targeting <code>main</code></td>
+    <td>Lint → Test + Build (parallel) <em>(migrate skipped)</em></td>
+  </tr>
+</table>
+
+<!-- SECTION 3: JOBS -->
+<h2 class="section">3. Job Definitions</h2>
+
+<h3><span class="step-num">1</span> Lint &amp; Type Check</h3>
+<table>
+  <tr><th>Property</th><th>Value</th></tr>
+  <tr><td>Runner</td><td><code>ubuntu-latest</code></td></tr>
+  <tr><td>Depends on</td><td>— (runs first)</td></tr>
+  <tr><td>Blocks</td><td>Test, Build jobs</td></tr>
+</table>
+<table>
+  <tr><th>#</th><th>Step</th><th>Command / Action</th><th>Purpose</th></tr>
+  <tr><td>1</td><td>Checkout</td><td><code>actions/checkout@v4</code></td><td>Clone repository at commit SHA</td></tr>
+  <tr><td>2</td><td>Setup Node</td><td><code>actions/setup-node@v4</code> (v22, npm cache)</td><td>Install Node 22 with npm dependency caching</td></tr>
+  <tr><td>3</td><td>Install deps</td><td><code>npm ci</code></td><td>Clean install from package-lock.json</td></tr>
+  <tr><td>4</td><td>ESLint</td><td><code>npm run lint</code></td><td>Enforce code style across src/ and tests/</td></tr>
+  <tr><td>5</td><td>Type check</td><td><code>npx tsc --noEmit</code></td><td>Verify TypeScript compiles without errors (no output)</td></tr>
+</table>
+<p><strong>Failure condition:</strong> Any ESLint error or TypeScript compiler error fails this job and blocks all downstream jobs.</p>
+
+<h3><span class="step-num">2</span> Unit Tests &amp; Coverage</h3>
+<table>
+  <tr><th>Property</th><th>Value</th></tr>
+  <tr><td>Runner</td><td><code>ubuntu-latest</code></td></tr>
+  <tr><td>Depends on</td><td>lint</td></tr>
+  <tr><td>Runs in parallel with</td><td>Build job</td></tr>
+</table>
+<table>
+  <tr><th>#</th><th>Step</th><th>Command / Action</th><th>Purpose</th></tr>
+  <tr><td>1</td><td>Checkout</td><td><code>actions/checkout@v4</code></td><td>—</td></tr>
+  <tr><td>2</td><td>Setup Node</td><td><code>actions/setup-node@v4</code> (v22)</td><td>—</td></tr>
+  <tr><td>3</td><td>Install deps</td><td><code>npm ci</code></td><td>—</td></tr>
+  <tr><td>4</td><td>Prisma generate</td><td><code>npm run db:generate</code></td><td>Generate Prisma client from schema (no DB needed)</td></tr>
+  <tr><td>5</td><td>Test + Coverage</td><td><code>npm run test:coverage</code></td><td>Run all 66 unit tests; enforce 80% coverage gate</td></tr>
+  <tr><td>6</td><td>Upload coverage</td><td><code>actions/upload-artifact@v4</code></td><td>Persist coverage/ folder as downloadable artefact (7 days)</td></tr>
+</table>
+<p><strong>Coverage gate:</strong> Configured in <code>package.json</code> — branches, functions, lines, statements all require ≥80%. Build fails if any threshold is breached.</p>
+<p><strong>Note:</strong> Tests use mocked Prisma, SES, and AuditLogger. No live database connection required.</p>
+
+<h3><span class="step-num">3</span> Build</h3>
+<table>
+  <tr><th>Property</th><th>Value</th></tr>
+  <tr><td>Runner</td><td><code>ubuntu-latest</code></td></tr>
+  <tr><td>Depends on</td><td>lint</td></tr>
+  <tr><td>Runs in parallel with</td><td>Test job</td></tr>
+</table>
+<table>
+  <tr><th>#</th><th>Step</th><th>Command / Action</th><th>Purpose</th></tr>
+  <tr><td>1</td><td>Checkout</td><td><code>actions/checkout@v4</code></td><td>—</td></tr>
+  <tr><td>2</td><td>Setup Node</td><td><code>actions/setup-node@v4</code> (v22)</td><td>—</td></tr>
+  <tr><td>3</td><td>Install deps</td><td><code>npm ci</code></td><td>—</td></tr>
+  <tr><td>4</td><td>Prisma generate</td><td><code>npm run db:generate</code></td><td>Required before TypeScript compilation</td></tr>
+  <tr><td>5</td><td>Compile</td><td><code>npm run build</code></td><td>Compile TypeScript → <code>dist/</code></td></tr>
+  <tr><td>6</td><td>Upload dist</td><td><code>actions/upload-artifact@v4</code></td><td>Persist compiled <code>dist/</code> as artefact (3 days)</td></tr>
+</table>
+
+<!-- PAGE BREAK -->
+<div class="page-break"></div>
+
+<h3><span class="step-num">4</span> Migration Check (main push only)</h3>
+<table>
+  <tr><th>Property</th><th>Value</th></tr>
+  <tr><td>Runner</td><td><code>ubuntu-latest</code></td></tr>
+  <tr><td>Depends on</td><td>test AND build (both must pass)</td></tr>
+  <tr><td>Condition</td><td>Only on <code>push</code> to <code>main</code> — skipped on PRs</td></tr>
+  <tr><td>Secrets required</td><td><span class="env-var">DATABASE_URL</span></td></tr>
+</table>
+<table>
+  <tr><th>#</th><th>Step</th><th>Command</th><th>Purpose</th></tr>
+  <tr><td>1</td><td>Checkout</td><td><code>actions/checkout@v4</code></td><td>—</td></tr>
+  <tr><td>2</td><td>Setup Node</td><td><code>actions/setup-node@v4</code></td><td>—</td></tr>
+  <tr><td>3</td><td>Install deps</td><td><code>npm ci</code></td><td>—</td></tr>
+  <tr><td>4</td><td>Drift check</td><td><code>prisma migrate diff</code></td><td>Detect any schema drift between migration files and current schema</td></tr>
+  <tr><td>5</td><td>Deploy</td><td><code>prisma migrate deploy</code></td><td>Apply pending migrations to production database (non-destructive)</td></tr>
+</table>
+<p><strong>Safety:</strong> <code>prisma migrate deploy</code> only applies pending migrations — it never rolls back or drops data. The drift check step warns if <code>schema.prisma</code> has changes not yet captured in a migration file.</p>
+
+<!-- SECTION 4: WORKFLOW YAML -->
+<h2 class="section">4. Workflow YAML — <code>.github/workflows/ci.yml</code></h2>
+<pre><span class="key">name:</span> <span class="val">CI</span>
+
+<span class="key">on:</span>
+  <span class="key">push:</span>
+    <span class="key">branches:</span> <span class="val">[main]</span>
+  <span class="key">pull_request:</span>
+    <span class="key">branches:</span> <span class="val">[main]</span>
+
+<span class="key">env:</span>
+  <span class="key">NODE_VERSION:</span> <span class="str">"22"</span>
+
+<span class="key">jobs:</span>
+  <span class="comment"># ── Job 1: Lint & Type Check ──────────────────</span>
+  <span class="key">lint:</span>
+    <span class="key">name:</span> <span class="val">Lint &amp; Type Check</span>
+    <span class="key">runs-on:</span> <span class="val">ubuntu-latest</span>
+    <span class="key">steps:</span>
+      <span class="kw">- uses:</span> <span class="val">actions/checkout@v4</span>
+      <span class="kw">- uses:</span> <span class="val">actions/setup-node@v4</span>
+        <span class="key">with:</span> <span class="key">node-version:</span> <span class="val">&#36;{{ env.NODE_VERSION }}</span><span class="key">, cache:</span> <span class="val">npm</span>
+      <span class="kw">- run:</span> <span class="val">npm ci</span>
+      <span class="kw">- run:</span> <span class="val">npm run lint</span>
+      <span class="kw">- run:</span> <span class="val">npx tsc --noEmit</span>
+
+  <span class="comment"># ── Job 2: Unit Tests & Coverage ─────────────</span>
+  <span class="key">test:</span>
+    <span class="key">name:</span> <span class="val">Unit Tests &amp; Coverage</span>
+    <span class="key">runs-on:</span> <span class="val">ubuntu-latest</span>
+    <span class="key">needs:</span> <span class="val">lint</span>
+    <span class="key">steps:</span>
+      <span class="kw">- uses:</span> <span class="val">actions/checkout@v4</span>
+      <span class="kw">- uses:</span> <span class="val">actions/setup-node@v4</span>
+        <span class="key">with:</span> <span class="key">node-version:</span> <span class="val">&#36;{{ env.NODE_VERSION }}</span><span class="key">, cache:</span> <span class="val">npm</span>
+      <span class="kw">- run:</span> <span class="val">npm ci</span>
+      <span class="kw">- run:</span> <span class="val">npm run db:generate</span>
+      <span class="kw">- run:</span> <span class="val">npm run test:coverage</span>
+      <span class="kw">- uses:</span> <span class="val">actions/upload-artifact@v4</span>
+        <span class="key">if:</span> <span class="val">always()</span>
+        <span class="key">with:</span> <span class="key">name:</span> <span class="val">coverage-report</span><span class="key">, path:</span> <span class="val">coverage/</span>
+
+  <span class="comment"># ── Job 3: Build ──────────────────────────────</span>
+  <span class="key">build:</span>
+    <span class="key">name:</span> <span class="val">Build</span>
+    <span class="key">runs-on:</span> <span class="val">ubuntu-latest</span>
+    <span class="key">needs:</span> <span class="val">lint</span>
+    <span class="key">steps:</span>
+      <span class="kw">- uses:</span> <span class="val">actions/checkout@v4</span>
+      <span class="kw">- uses:</span> <span class="val">actions/setup-node@v4</span>
+        <span class="key">with:</span> <span class="key">node-version:</span> <span class="val">&#36;{{ env.NODE_VERSION }}</span><span class="key">, cache:</span> <span class="val">npm</span>
+      <span class="kw">- run:</span> <span class="val">npm ci</span>
+      <span class="kw">- run:</span> <span class="val">npm run db:generate</span>
+      <span class="kw">- run:</span> <span class="val">npm run build</span>
+      <span class="kw">- uses:</span> <span class="val">actions/upload-artifact@v4</span>
+        <span class="key">with:</span> <span class="key">name:</span> <span class="val">dist</span><span class="key">, path:</span> <span class="val">dist/</span>
+
+  <span class="comment"># ── Job 4: Migrate (main push only) ──────────</span>
+  <span class="key">migrate:</span>
+    <span class="key">name:</span> <span class="val">Migration Check</span>
+    <span class="key">runs-on:</span> <span class="val">ubuntu-latest</span>
+    <span class="key">needs:</span> <span class="val">[test, build]</span>
+    <span class="key">if:</span> <span class="val">github.ref == 'refs/heads/main' &amp;&amp; github.event_name == 'push'</span>
+    <span class="key">env:</span>
+      <span class="key">DATABASE_URL:</span> <span class="val">&#36;{{ secrets.DATABASE_URL }}</span>
+    <span class="key">steps:</span>
+      <span class="kw">- uses:</span> <span class="val">actions/checkout@v4</span>
+      <span class="kw">- uses:</span> <span class="val">actions/setup-node@v4</span>
+        <span class="key">with:</span> <span class="key">node-version:</span> <span class="val">&#36;{{ env.NODE_VERSION }}</span><span class="key">, cache:</span> <span class="val">npm</span>
+      <span class="kw">- run:</span> <span class="val">npm ci</span>
+      <span class="kw">- run:</span> <span class="val">npx prisma migrate diff ...</span>
+      <span class="kw">- run:</span> <span class="val">npx prisma migrate deploy</span></pre>
+
+<!-- SECTION 5: SECRETS -->
+<h2 class="section">5. Required GitHub Secrets</h2>
+<table>
+  <tr><th>Secret Name</th><th>Used By</th><th>Value</th></tr>
+  <tr>
+    <td><span class="env-var">DATABASE_URL</span></td>
+    <td>migrate job</td>
+    <td>Neon PostgreSQL connection string — <code>postgresql://user:pass@host/db?sslmode=require</code></td>
+  </tr>
+</table>
+<p>Add via: <strong>GitHub Repo → Settings → Secrets and variables → Actions → New repository secret</strong></p>
+
+<!-- SECTION 6: COVERAGE GATE -->
+<h2 class="section">6. Coverage Thresholds</h2>
+<p>Configured in <code>package.json</code> under <code>jest.coverageThreshold</code>:</p>
+<table>
+  <tr><th>Metric</th><th>Threshold</th><th>Current</th></tr>
+  <tr><td>Branches</td><td>80%</td><td><span class="badge green">✓ Passing</span></td></tr>
+  <tr><td>Functions</td><td>80%</td><td><span class="badge green">✓ Passing</span></td></tr>
+  <tr><td>Lines</td><td>80%</td><td><span class="badge green">✓ Passing</span></td></tr>
+  <tr><td>Statements</td><td>80%</td><td><span class="badge green">✓ Passing</span></td></tr>
+</table>
+
+<!-- SECTION 7: RECOMMENDATIONS -->
+<h2 class="section">7. Recommended Enhancements</h2>
+<table>
+  <tr><th>Enhancement</th><th>Priority</th><th>Description</th></tr>
+  <tr><td>Branch protection rules</td><td><span class="badge red">High</span></td><td>Require CI to pass before merging PRs to main</td></tr>
+  <tr><td>Codecov integration</td><td><span class="badge amber">Medium</span></td><td>Add <code>codecov/codecov-action@v4</code> after test step to track coverage trends</td></tr>
+  <tr><td>Dependency audit</td><td><span class="badge amber">Medium</span></td><td>Add <code>npm audit --audit-level=high</code> step to lint job</td></tr>
+  <tr><td>Integration tests</td><td><span class="badge amber">Medium</span></td><td>Add a separate <code>integration</code> job using a PostgreSQL service container</td></tr>
+  <tr><td>Docker build</td><td><span class="badge blue">Low</span></td><td>Add job to build and push Docker image to GHCR on main push</td></tr>
+  <tr><td>Release tagging</td><td><span class="badge blue">Low</span></td><td>Add semantic-release or manual tag trigger to publish versioned releases</td></tr>
+</table>
+
+<div class="footer">
+  Powerweave Engineering · CI Pipeline Definition · 26 May 2026 · Generated by Claude Code
+</div>
+
+</body>
+</html>

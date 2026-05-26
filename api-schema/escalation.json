@@ -1,0 +1,652 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Smart Task Escalation Engine API",
+    "description": "REST API for creating, managing, and auditing task escalations within the Powerweave platform.\n",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Powerweave Engineering",
+      "email": "eng@powerweave.io"
+    }
+  },
+  "servers": [
+    {
+      "url": "https://api.powerweave.io/api/v1",
+      "description": "Production"
+    },
+    {
+      "url": "http://localhost:3001/api/v1",
+      "description": "Local Development"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Escalations",
+      "description": "Manage task escalations"
+    },
+    {
+      "name": "Notifications",
+      "description": "Trigger and manage notifications"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "EscalationTier": {
+        "type": "string",
+        "enum": [
+          "L1",
+          "L2",
+          "L3"
+        ],
+        "description": "L1 = overdue 0–4 hrs (team lead notified), L2 = overdue 4–24 hrs (manager notified), L3 = overdue >24 hrs (director notified)\n"
+      },
+      "EscalationStatus": {
+        "type": "string",
+        "enum": [
+          "OPEN",
+          "IN_PROGRESS",
+          "RESOLVED",
+          "CLOSED"
+        ]
+      },
+      "Escalation": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "example": "3f4a2c1d-89ab-4cde-b012-3456789abcde"
+          },
+          "taskId": {
+            "type": "string",
+            "format": "uuid",
+            "example": "7a1b3c2d-45ef-6789-ab01-23456789cdef"
+          },
+          "status": {
+            "$ref": "#/components/schemas/EscalationStatus"
+          },
+          "tier": {
+            "$ref": "#/components/schemas/EscalationTier"
+          },
+          "reason": {
+            "type": "string",
+            "example": "Task overdue by 6 hours, SLA breach imminent"
+          },
+          "escalatedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "assignedManager": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "resolvedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "AuditLogEntry": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "escalationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "action": {
+            "type": "string",
+            "enum": [
+              "CREATED",
+              "STATUS_CHANGED",
+              "NOTIFIED",
+              "RESOLVED"
+            ]
+          },
+          "performedBy": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "oldValue": {
+            "type": "object",
+            "nullable": true
+          },
+          "newValue": {
+            "type": "object",
+            "nullable": true
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "object",
+            "required": [
+              "code",
+              "message"
+            ],
+            "properties": {
+              "code": {
+                "type": "string",
+                "example": "ESCALATION_NOT_FOUND"
+              },
+              "message": {
+                "type": "string",
+                "example": "No escalation found with the given ID"
+              },
+              "details": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "field": {
+                      "type": "string"
+                    },
+                    "issue": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "security": [
+    {
+      "BearerAuth": []
+    }
+  ],
+  "paths": {
+    "/escalations": {
+      "post": {
+        "summary": "Create Escalation",
+        "description": "Manually creates a new escalation for an overdue task. Requires role: ADMIN or MANAGER. Triggers notification dispatch immediately upon successful creation.\n",
+        "operationId": "createEscalation",
+        "tags": [
+          "Escalations"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "taskId",
+                  "tier",
+                  "reason"
+                ],
+                "properties": {
+                  "taskId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "ID of the task being escalated",
+                    "example": "7a1b3c2d-45ef-6789-ab01-23456789cdef"
+                  },
+                  "tier": {
+                    "$ref": "#/components/schemas/EscalationTier"
+                  },
+                  "reason": {
+                    "type": "string",
+                    "minLength": 10,
+                    "maxLength": 500,
+                    "example": "Task has been overdue for 6 hours with no update from assignee"
+                  },
+                  "assignedManagerId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "Optional override for manager assignment. Defaults to team manager derived from task's teamId.\n"
+                  }
+                }
+              },
+              "example": {
+                "taskId": "7a1b3c2d-45ef-6789-ab01-23456789cdef",
+                "tier": "L2",
+                "reason": "Task overdue by 6 hours; assignee unreachable.",
+                "assignedManagerId": "9c0d1e2f-3456-789a-bcde-f01234567890"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Escalation created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Escalation"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Escalation created and notification dispatched"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": {
+                    "code": "VALIDATION_ERROR",
+                    "message": "Request body validation failed",
+                    "details": [
+                      {
+                        "field": "reason",
+                        "issue": "Must be at least 10 characters"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": {
+                    "code": "FORBIDDEN",
+                    "message": "Role DEVELOPER cannot create escalations"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Task not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Active escalation already exists for this task",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": {
+                    "code": "DUPLICATE_ESCALATION",
+                    "message": "An active escalation already exists for task 7a1b3c2d"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/escalations/{id}/history": {
+      "get": {
+        "summary": "Fetch Escalation History",
+        "description": "Returns the full audit log for a given escalation, ordered chronologically. Accessible by all authenticated roles but scoped to team visibility for DEVELOPER and VIEWER roles.\n",
+        "operationId": "getEscalationHistory",
+        "tags": [
+          "Escalations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Escalation UUID",
+            "example": "3f4a2c1d-89ab-4cde-b012-3456789abcde"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            },
+            "description": "Number of audit entries to return"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "default": 0
+            },
+            "description": "Pagination offset"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Escalation history retrieved",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/AuditLogEntry"
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "total": {
+                          "type": "integer"
+                        },
+                        "limit": {
+                          "type": "integer"
+                        },
+                        "offset": {
+                          "type": "integer"
+                        },
+                        "hasMore": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Access denied — not in escalation's team scope",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Escalation not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/escalations/{id}/status": {
+      "patch": {
+        "summary": "Update Escalation Status",
+        "description": "Updates the status of an existing escalation. Valid transitions: OPEN → IN_PROGRESS → RESOLVED → CLOSED. MANAGER and ADMIN roles only. Triggers audit log entry.\n",
+        "operationId": "updateEscalationStatus",
+        "tags": [
+          "Escalations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "Escalation UUID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "status"
+                ],
+                "properties": {
+                  "status": {
+                    "$ref": "#/components/schemas/EscalationStatus"
+                  },
+                  "resolutionNote": {
+                    "type": "string",
+                    "maxLength": 1000,
+                    "description": "Required when status is RESOLVED or CLOSED. Describes how the escalation was addressed.\n"
+                  }
+                }
+              },
+              "example": {
+                "status": "RESOLVED",
+                "resolutionNote": "Developer completed the task. Reviewed and accepted by QA."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Status updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "$ref": "#/components/schemas/Escalation"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Escalation status updated to RESOLVED"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid status transition",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": {
+                    "code": "INVALID_TRANSITION",
+                    "message": "Cannot transition from CLOSED to OPEN"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Insufficient permissions",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Escalation not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/notifications/trigger": {
+      "post": {
+        "summary": "Trigger Notification",
+        "description": "Manually re-triggers notification dispatch for an existing escalation. Useful when initial notification failed or additional stakeholders need to be alerted. ADMIN only.\n",
+        "operationId": "triggerNotification",
+        "tags": [
+          "Notifications"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "escalationId",
+                  "channels"
+                ],
+                "properties": {
+                  "escalationId": {
+                    "type": "string",
+                    "format": "uuid",
+                    "description": "ID of the escalation to re-notify for"
+                  },
+                  "channels": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "EMAIL",
+                        "IN_APP"
+                      ]
+                    },
+                    "minItems": 1,
+                    "description": "Channels to dispatch notification through"
+                  },
+                  "recipientOverrides": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "description": "Optional list of user IDs to notify instead of the default role-based recipients.\n"
+                  }
+                }
+              },
+              "example": {
+                "escalationId": "3f4a2c1d-89ab-4cde-b012-3456789abcde",
+                "channels": [
+                  "EMAIL",
+                  "IN_APP"
+                ],
+                "recipientOverrides": [
+                  "9c0d1e2f-3456-789a-bcde-f01234567890"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Notification dispatch accepted and queued",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Notification dispatched to 2 recipients via EMAIL, IN_APP"
+                    },
+                    "notificationIds": {
+                      "type": "array",
+                      "items": {
+                        "type": "string",
+                        "format": "uuid"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Admin role required",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Escalation not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

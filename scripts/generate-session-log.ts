@@ -1,0 +1,303 @@
+import { chromium } from "@playwright/test";
+import * as fs from "fs";
+import * as path from "path";
+
+const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; font-size: 11px; color: #1a1a1a; background: #fff; padding: 40px 50px; line-height: 1.6; }
+  .cover { text-align: center; padding: 60px 0 40px; border-bottom: 3px solid #1565C0; margin-bottom: 36px; }
+  .cover h1 { font-size: 26px; color: #1565C0; font-weight: 700; margin-bottom: 8px; }
+  .cover h2 { font-size: 15px; color: #444; font-weight: 400; margin-bottom: 24px; }
+  .cover .meta { display: flex; justify-content: center; gap: 40px; font-size: 11px; color: #555; }
+  .cover .meta span strong { color: #1a1a1a; }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 10px; font-weight: 600; }
+  .badge.green { background: #E8F5E9; color: #2E7D32; }
+  .badge.blue  { background: #E3F2FD; color: #1565C0; }
+  .badge.amber { background: #FFF8E1; color: #F57F17; }
+  h2.section { font-size: 15px; color: #1565C0; border-bottom: 2px solid #BBDEFB; padding-bottom: 5px; margin: 28px 0 14px; text-transform: uppercase; letter-spacing: 0.5px; }
+  h3 { font-size: 12px; color: #333; margin: 16px 0 6px; font-weight: 600; }
+  p { margin-bottom: 8px; color: #333; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 10.5px; }
+  th { background: #1565C0; color: #fff; padding: 7px 10px; text-align: left; font-weight: 600; }
+  td { padding: 6px 10px; border-bottom: 1px solid #e0e0e0; vertical-align: top; }
+  tr:nth-child(even) td { background: #F5F5F5; }
+  code { font-family: 'Consolas', monospace; background: #f0f4ff; padding: 1px 5px; border-radius: 3px; font-size: 10px; color: #1a237e; }
+  .cmd { font-family: 'Consolas', monospace; background: #263238; color: #80CBC4; padding: 8px 12px; border-radius: 4px; font-size: 10px; margin: 6px 0 10px; display: block; }
+  .status-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+  .stat-box { flex: 1; min-width: 100px; border: 1px solid #e0e0e0; border-radius: 6px; padding: 10px 14px; text-align: center; }
+  .stat-box .num { font-size: 24px; font-weight: 700; color: #1565C0; }
+  .stat-box .lbl { font-size: 10px; color: #777; }
+  ul { padding-left: 18px; margin-bottom: 10px; }
+  li { margin-bottom: 3px; color: #333; }
+  .check { color: #2E7D32; font-weight: bold; }
+  .footer { margin-top: 40px; border-top: 1px solid #e0e0e0; padding-top: 12px; text-align: center; font-size: 9.5px; color: #999; }
+  .highlight { background: #FFF9C4; padding: 1px 4px; border-radius: 3px; }
+  .page-break { page-break-before: always; }
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover">
+  <h1>Development Session Log</h1>
+  <h2>Powerweave Smart Task Escalation Engine</h2>
+  <div class="meta">
+    <span><strong>Date:</strong> 26 May 2026</span>
+    <span><strong>Engineer:</strong> manas.naik@powerweave.io</span>
+    <span><strong>Session:</strong> Full Build &amp; Deploy</span>
+    <span><strong>Status:</strong> <span class="badge green">COMPLETE</span></span>
+  </div>
+</div>
+
+<!-- SUMMARY STATS -->
+<div class="status-row">
+  <div class="stat-box"><div class="num">66</div><div class="lbl">Tests Passing</div></div>
+  <div class="stat-box"><div class="num">5</div><div class="lbl">Test Suites</div></div>
+  <div class="stat-box"><div class="num">14</div><div class="lbl">Files Committed</div></div>
+  <div class="stat-box"><div class="num">6</div><div class="lbl">DB Tables Created</div></div>
+  <div class="stat-box"><div class="num">3</div><div class="lbl">API Endpoints Live</div></div>
+  <div class="stat-box"><div class="num">1</div><div class="lbl">PR Merged</div></div>
+</div>
+
+<!-- SECTION 1 -->
+<h2 class="section">1. Session Objectives</h2>
+<p>Bootstrap the Powerweave Smart Task Escalation Engine from source files to a fully deployed, tested, and documented REST API backed by a cloud PostgreSQL database.</p>
+<ul>
+  <li>Resolve missing build artefacts and TypeScript compilation errors</li>
+  <li>Set up Prisma schema, generate client, and run migrations against Neon (PostgreSQL)</li>
+  <li>Seed the database with representative test data</li>
+  <li>Wire up Express routes with RBAC middleware and test all endpoints</li>
+  <li>Achieve full CI-green test suite (unit tests across all modules)</li>
+  <li>Establish Git workflow: init → commit → PR → merge</li>
+</ul>
+
+<!-- SECTION 2 -->
+<h2 class="section">2. Issues Resolved</h2>
+<table>
+  <tr><th>#</th><th>Issue</th><th>Root Cause</th><th>Resolution</th><th>Status</th></tr>
+  <tr>
+    <td>1</td>
+    <td><code>Cannot find module 'dist/index.js'</code></td>
+    <td>Missing <code>tsconfig.json</code>, <code>src/index.ts</code> entry point, and Prisma schema</td>
+    <td>Created <code>tsconfig.json</code>, <code>src/index.ts</code>, <code>prisma/schema.prisma</code>, ran <code>npm run build</code></td>
+    <td><span class="badge green">Fixed</span></td>
+  </tr>
+  <tr>
+    <td>2</td>
+    <td>TypeScript: <code>Property 'user' does not exist on Request</code></td>
+    <td>No Express type augmentation for <code>req.user</code></td>
+    <td>Created <code>src/types/express.d.ts</code> extending Express <code>Request</code></td>
+    <td><span class="badge green">Fixed</span></td>
+  </tr>
+  <tr>
+    <td>3</td>
+    <td>Prisma: <code>EscalationStatus</code>, <code>EscalationTier</code> not exported</td>
+    <td>Prisma client not generated (schema missing)</td>
+    <td>Created <code>prisma/schema.prisma</code> with all models and enums, ran <code>prisma generate</code></td>
+    <td><span class="badge green">Fixed</span></td>
+  </tr>
+  <tr>
+    <td>4</td>
+    <td>Test TS error: <code>'() =&gt; string' not assignable to Date mock</code></td>
+    <td>Jest Date mock cast used <code>as unknown as string</code> instead of <code>Date</code></td>
+    <td>Changed cast to <code>as unknown as Date</code> in both affected test files</td>
+    <td><span class="badge green">Fixed</span></td>
+  </tr>
+  <tr>
+    <td>5</td>
+    <td>Audit log test: <code>oldValue: JsonNull {}</code> vs expected <code>null</code></td>
+    <td>Code used <code>Prisma.JsonNull</code> sentinel (an object), tests expected JS <code>null</code></td>
+    <td>Changed cast to <code>(oldValue ?? null) as unknown as Prisma.InputJsonValue</code></td>
+    <td><span class="badge green">Fixed</span></td>
+  </tr>
+  <tr>
+    <td>6</td>
+    <td>POST <code>/escalations</code> returning <code>VALIDATION_ERROR</code> for taskId</td>
+    <td>Seed data used non-UUID IDs (e.g. <code>task-00000-0000-...</code>)</td>
+    <td>Rewrote seed with proper UUID format (<code>00000000-0000-0000-0000-000000000021</code>)</td>
+    <td><span class="badge green">Fixed</span></td>
+  </tr>
+  <tr>
+    <td>7</td>
+    <td>API endpoints returning 401 for all requests</td>
+    <td>No JWT auth middleware implemented to populate <code>req.user</code></td>
+    <td>Added dev auth middleware reading from <code>X-User-*</code> headers</td>
+    <td><span class="badge green">Fixed</span></td>
+  </tr>
+  <tr>
+    <td>8</td>
+    <td>Prisma <code>EPERM</code> on DLL rename during generate</td>
+    <td>Node process held file lock on <code>query_engine-windows.dll.node</code></td>
+    <td>Killed stale Node processes before running <code>prisma generate</code></td>
+    <td><span class="badge green">Fixed</span></td>
+  </tr>
+  <tr>
+    <td>9</td>
+    <td>GitHub PR creation returning 403</td>
+    <td>Fine-grained PAT lacked explicit <code>pull_requests: write</code> permission</td>
+    <td>Switched to Classic PAT with <code>repo</code> scope</td>
+    <td><span class="badge green">Fixed</span></td>
+  </tr>
+  <tr>
+    <td>10</td>
+    <td>PR branches had no shared history (422 from GitHub API)</td>
+    <td><code>main</code> was created as an orphan branch</td>
+    <td>Recreated <code>main</code> from <code>master</code> HEAD so both share history</td>
+    <td><span class="badge green">Fixed</span></td>
+  </tr>
+</table>
+
+<!-- SECTION 3 -->
+<h2 class="section">3. Artefacts Created</h2>
+<table>
+  <tr><th>File / Artefact</th><th>Type</th><th>Purpose</th></tr>
+  <tr><td><code>tsconfig.json</code></td><td>Config</td><td>TypeScript compiler settings (rootDir: src, outDir: dist, strict)</td></tr>
+  <tr><td><code>src/index.ts</code></td><td>Source</td><td>Express app entry point — routes, middleware, error handler</td></tr>
+  <tr><td><code>src/types/express.d.ts</code></td><td>Type def</td><td>Augments Express Request with <code>req.user</code> shape</td></tr>
+  <tr><td><code>prisma/schema.prisma</code></td><td>Schema</td><td>Prisma schema for all 6 models: User, Team, Task, Escalation, EscalationAuditLog, Notification</td></tr>
+  <tr><td><code>prisma/migrations/20260526170100_init/</code></td><td>Migration</td><td>Initial DB migration — creates all tables in Neon PostgreSQL</td></tr>
+  <tr><td><code>prisma/seed.ts</code></td><td>Script</td><td>Idempotent seed: 2 teams, 5 users, 3 tasks, 3 escalations, 3 audit logs</td></tr>
+  <tr><td><code>.gitignore</code></td><td>Config</td><td>Excludes node_modules, dist, .env, coverage</td></tr>
+  <tr><td><code>.env</code></td><td>Secret</td><td>DATABASE_URL pointing to Neon; gitignored</td></tr>
+  <tr><td><code>.env.example</code></td><td>Template</td><td>Environment variable template for onboarding</td></tr>
+  <tr><td><code>tests/unit/escalation.service.test.ts</code></td><td>Test</td><td>22 unit tests for EscalationService (createEscalation, updateStatus, getHistory)</td></tr>
+  <tr><td><code>api-schema/escalation.json</code></td><td>Schema</td><td>OpenAPI 3.0 JSON schema converted from existing YAML</td></tr>
+  <tr><td><code>scripts/generate-session-log.ts</code></td><td>Script</td><td>This PDF generator (Playwright-based)</td></tr>
+</table>
+
+<!-- SECTION 4 — page break -->
+<div class="page-break"></div>
+
+<h2 class="section">4. Database Setup</h2>
+<h3>Provider</h3>
+<p><strong>Neon</strong> (serverless PostgreSQL) — free tier, region: <code>us-east-1</code></p>
+<h3>Tables Created</h3>
+<table>
+  <tr><th>Table</th><th>Rows (seed)</th><th>Key Columns</th></tr>
+  <tr><td><code>teams</code></td><td>2</td><td>id, name, managerId</td></tr>
+  <tr><td><code>users</code></td><td>5</td><td>id, email, name, role, teamId</td></tr>
+  <tr><td><code>tasks</code></td><td>3</td><td>id, title, teamId</td></tr>
+  <tr><td><code>escalations</code></td><td>3</td><td>id, taskId, tier, status, escalatedBy, assignedManager, resolvedAt, resolutionNote</td></tr>
+  <tr><td><code>escalation_audit_logs</code></td><td>3</td><td>id, escalationId, action, performedBy, oldValue, newValue, timestamp</td></tr>
+  <tr><td><code>notifications</code></td><td>0</td><td>id, escalationId, recipientId, channel, status, sentAt</td></tr>
+</table>
+<h3>Migration Command</h3>
+<code class="cmd">npx prisma migrate dev --name init</code>
+<h3>Seed Command</h3>
+<code class="cmd">npx ts-node prisma/seed.ts</code>
+
+<!-- SECTION 5 -->
+<h2 class="section">5. API Endpoints — Live Test Results</h2>
+<table>
+  <tr><th>Method</th><th>Path</th><th>Role Required</th><th>Result</th><th>HTTP</th></tr>
+  <tr>
+    <td><span class="badge blue">POST</span></td>
+    <td><code>/api/v1/escalations</code></td>
+    <td>ADMIN, MANAGER</td>
+    <td>Created escalation <code>2f66dacb...</code>, auto-assigned to Team Beta manager, notification dispatched</td>
+    <td><span class="badge green">201</span></td>
+  </tr>
+  <tr>
+    <td><span class="badge green">GET</span></td>
+    <td><code>/api/v1/escalations/:id/history</code></td>
+    <td>All roles (team-scoped)</td>
+    <td>Returned 2 audit log entries (CREATED + STATUS_CHANGED) with pagination metadata</td>
+    <td><span class="badge green">200</span></td>
+  </tr>
+  <tr>
+    <td><span class="badge amber">PATCH</span></td>
+    <td><code>/api/v1/escalations/:id/status</code></td>
+    <td>ADMIN, MANAGER</td>
+    <td>Transitioned escalation from <code>OPEN</code> → <code>IN_PROGRESS</code> with audit log written</td>
+    <td><span class="badge green">200</span></td>
+  </tr>
+  <tr>
+    <td><span class="badge blue">POST</span></td>
+    <td><code>/api/v1/escalations</code> (no auth)</td>
+    <td>—</td>
+    <td>RBAC guard correctly rejected unauthenticated request</td>
+    <td><span class="badge amber">401</span></td>
+  </tr>
+</table>
+
+<!-- SECTION 6 -->
+<h2 class="section">6. Test Suite Results</h2>
+<table>
+  <tr><th>Test File</th><th>Tests</th><th>Coverage Area</th><th>Result</th></tr>
+  <tr><td><code>escalation.service.test.ts</code></td><td>22</td><td>createEscalation, updateStatus, getHistory — all business logic paths</td><td><span class="badge green">PASS</span></td></tr>
+  <tr><td><code>escalation.validation.test.ts</code></td><td>12</td><td>Zod schemas: CreateEscalationSchema, UpdateStatusSchema — boundary values</td><td><span class="badge green">PASS</span></td></tr>
+  <tr><td><code>role.permission.test.ts</code></td><td>10</td><td>RBAC permission map, requirePermission middleware</td><td><span class="badge green">PASS</span></td></tr>
+  <tr><td><code>notification.trigger.test.ts</code></td><td>10</td><td>NotificationService.dispatch — EMAIL, IN_APP, overrides, SES failure</td><td><span class="badge green">PASS</span></td></tr>
+  <tr><td><code>audit.logger.test.ts</code></td><td>12</td><td>AuditLogger.log, getLogsForEscalation — non-fatal error handling</td><td><span class="badge green">PASS</span></td></tr>
+  <tr><td colspan="2"><strong>Total: 66 tests</strong></td><td colspan="2"><strong>5 suites — 0 failures — ~5.5s</strong></td></tr>
+</table>
+
+<!-- SECTION 7 -->
+<h2 class="section">7. Git History</h2>
+<table>
+  <tr><th>Commit</th><th>Message</th><th>Branch</th></tr>
+  <tr><td><code>719fa68</code></td><td>Initial commit: Powerweave escalation engine (29 files)</td><td>master</td></tr>
+  <tr><td><code>3b4de1d</code></td><td>chore: add .env.example with required environment variables</td><td>master</td></tr>
+  <tr><td><code>0fd614e</code></td><td>feat: Add Powerweave escalation engine <em>(PR #1 merge commit)</em></td><td>main</td></tr>
+  <tr><td><code>6475dbb</code></td><td>chore: add initial Prisma migration</td><td>main</td></tr>
+  <tr><td><code>9108423</code></td><td>chore: add database seed with teams, users, tasks and escalations</td><td>main</td></tr>
+  <tr><td><code>d56dcc5</code></td><td>feat: add dev auth middleware and fix seed UUIDs for API testing</td><td>main</td></tr>
+</table>
+
+<!-- SECTION 8 -->
+<h2 class="section">8. GitHub Repository</h2>
+<table>
+  <tr><th>Item</th><th>Detail</th></tr>
+  <tr><td>Repository</td><td><code>https://github.com/Manas-Naik/powerweave-escalation</code></td></tr>
+  <tr><td>Default branch</td><td><code>main</code></td></tr>
+  <tr><td>PR #1</td><td>feat: Add Powerweave escalation engine — <span class="badge green">Merged</span></td></tr>
+  <tr><td>CI</td><td>Not configured (recommended: add GitHub Actions for <code>npm test</code> on push)</td></tr>
+</table>
+
+<!-- SECTION 9 -->
+<h2 class="section">9. Next Steps / Recommendations</h2>
+<ul>
+  <li><span class="check">→</span> <strong>Replace dev auth middleware</strong> with proper JWT verification (<code>jsonwebtoken</code> already in dependencies)</li>
+  <li><span class="check">→</span> <strong>Upgrade Node.js to v22+</strong> to eliminate AWS SDK version warning</li>
+  <li><span class="check">→</span> <strong>Add GitHub Actions CI</strong> — run <code>npm test</code> on every push to <code>main</code></li>
+  <li><span class="check">→</span> <strong>Configure AWS SES</strong> — set real <code>AWS_REGION</code> and <code>SES_FROM_EMAIL</code> in production env</li>
+  <li><span class="check">→</span> <strong>Revoke exposed GitHub tokens</strong> — both PATs shared during this session should be deleted</li>
+  <li><span class="check">→</span> <strong>Add integration tests</strong> — Supertest against a test database for end-to-end route coverage</li>
+  <li><span class="check">→</span> <strong>Enable Prisma migrations in CI</strong> — run <code>prisma migrate deploy</code> on staging/production deploy</li>
+</ul>
+
+<div class="footer">
+  Powerweave Engineering · Development Session Log · 26 May 2026 · Generated by Claude Code
+</div>
+
+</body>
+</html>`;
+
+async function generate() {
+  const outDir = path.join(__dirname, "..", "docs");
+  const htmlPath = path.join(outDir, "session-log.html");
+  const pdfPath  = path.join(outDir, "session-log.pdf");
+
+  fs.writeFileSync(htmlPath, html);
+  console.log("HTML written.");
+
+  const browser = await chromium.launch();
+  const page    = await browser.newPage();
+  await page.goto(`file:///${htmlPath.replace(/\\/g, "/")}`, { waitUntil: "networkidle" });
+  await page.pdf({
+    path: pdfPath,
+    format: "A4",
+    margin: { top: "15mm", bottom: "15mm", left: "15mm", right: "15mm" },
+    printBackground: true,
+  });
+  await browser.close();
+
+  const size = (fs.statSync(pdfPath).size / 1024).toFixed(1);
+  console.log(`PDF generated: docs/session-log.pdf (${size} KB)`);
+}
+
+generate().catch(e => { console.error(e); process.exit(1); });
