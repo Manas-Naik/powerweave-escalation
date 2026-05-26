@@ -1,0 +1,118 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum EscalationStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum EscalationTier {
+  L1
+  L2
+  L3
+}
+
+enum NotificationChannel {
+  EMAIL
+  IN_APP
+}
+
+enum NotificationStatus {
+  SENT
+  FAILED
+  PENDING
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  DEVELOPER
+  VIEWER
+}
+
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  name          String
+  role          UserRole
+  teamId        String
+  team          Team           @relation(fields: [teamId], references: [id])
+  createdAt     DateTime       @default(now())
+
+  @@map("users")
+}
+
+model Team {
+  id         String   @id @default(uuid())
+  name       String
+  managerId  String?
+  createdAt  DateTime @default(now())
+  users      User[]
+  tasks      Task[]
+
+  @@map("teams")
+}
+
+model Task {
+  id          String       @id @default(uuid())
+  title       String
+  teamId      String
+  team        Team         @relation(fields: [teamId], references: [id])
+  createdAt   DateTime     @default(now())
+  escalations Escalation[]
+
+  @@map("tasks")
+}
+
+model Escalation {
+  id              String           @id @default(uuid())
+  taskId          String
+  task            Task             @relation(fields: [taskId], references: [id])
+  tier            EscalationTier
+  reason          String
+  status          EscalationStatus @default(OPEN)
+  escalatedBy     String
+  assignedManager String
+  resolvedAt      DateTime?
+  resolutionNote  String?
+  createdAt       DateTime         @default(now())
+  auditLogs       EscalationAuditLog[]
+  notifications   Notification[]
+
+  @@map("escalations")
+}
+
+model EscalationAuditLog {
+  id            String     @id @default(uuid())
+  escalationId  String
+  escalation    Escalation @relation(fields: [escalationId], references: [id])
+  action        String
+  performedBy   String
+  oldValue      Json?
+  newValue      Json       @default("{}")
+  timestamp     DateTime   @default(now())
+
+  @@map("escalation_audit_logs")
+}
+
+model Notification {
+  id            String              @id @default(uuid())
+  escalationId  String
+  escalation    Escalation          @relation(fields: [escalationId], references: [id])
+  recipientId   String
+  channel       NotificationChannel
+  status        NotificationStatus
+  message       String?
+  sentAt        DateTime?
+  createdAt     DateTime            @default(now())
+
+  @@map("notifications")
+}
