@@ -4,11 +4,23 @@ import { AuditLogger } from "./utils/audit.logger";
 import { NotificationService } from "./services/notification.service";
 import { EscalationService } from "./services/escalation.service";
 import { EscalationController } from "./controllers/escalation.controller";
-import { requirePermission } from "./middleware/rbac.guard";
+import { requirePermission, UserRole } from "./middleware/rbac.guard";
 import { AppError } from "./utils/app-error";
 
 const app = express();
 app.use(express.json());
+
+// Dev auth middleware: reads X-User-Id, X-User-Role, X-User-Team-Id headers.
+// Replace with JWT verification in production.
+app.use((req: Request, _res: Response, next: NextFunction) => {
+  const id = req.headers["x-user-id"] as string;
+  const role = req.headers["x-user-role"] as string;
+  const teamId = req.headers["x-user-team-id"] as string;
+  if (id && role && teamId) {
+    req.user = { id, role: role as UserRole, teamId };
+  }
+  next();
+});
 
 const prisma = new PrismaClient();
 const auditLogger = new AuditLogger(prisma);
